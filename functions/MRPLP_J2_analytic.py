@@ -2,11 +2,10 @@
 from typing import Callable, Type
 
 import numpy as np
-from numpy.typing import NDArray
-from daceypy import DA, array, RK, integrator
-from scipy.io import loadmat
+from daceypy import DA, array
 from scipy.optimize import fsolve
 import time
+import warnings
 
 """ In this script, all the functions needed to solve the Multi-Revolution Perturbed Lambert Problem (MRPLP) are given.
     The solution uses the analytic J2 propagation (hopefully it is sufficient...).
@@ -582,6 +581,7 @@ def mrplp_J2_analytic(params: mrplp_J2_analytic_parameters):
 
         # solve using fsolve and the maps
         dvv1Guess = np.array([0, 0, 0])
+        warnings.filterwarnings("ignore", category=RuntimeWarning) # suppress the warnings about the run time
         result = fsolve(fsolveFromMap, dvv1Guess, args=(mapD, dcont))
 
         # update the params
