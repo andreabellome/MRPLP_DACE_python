@@ -6,9 +6,9 @@ from numpy.typing import NDArray
 from daceypy import DA, array, RK, integrator
 
 # define the constant of motion
-mu = 398600.0  # km^3/s^2
+mu = 398600.4418  # km^3/s^2
 J2 = 1.08262668e-3
-R = 6378137e-3 # km
+R = 6378.137 # km
 
 
 # define the integrator --> Runge-Kutta 78
@@ -190,9 +190,9 @@ def TBP_J2(x: array, t: float) -> array:
     vel: array = x[3:]
     r = pos.vnorm()
     acc: array = -mu * pos / (r ** 3)
-    acc[0] = acc[0] + 1.5*J2*R**2/(2.*r**5)*(5.*(pos[2]**2)/(r**2) - 1.)*pos[0]
-    acc[1] = acc[1] + 1.5*J2*R**2/(2.*r**5)*(5.*(pos[2]**2)/(r**2) - 1.)*pos[1]
-    acc[2] = acc[2] + 1.5*J2*R**2/(2.*r**5)*(5.*(pos[2]**2)/(r**2) - 3.)*pos[2]
+    acc[0] = acc[0] + 1.5*mu*J2*R**2/(r**5)*(5.*(pos[2]**2)/(r**2) - 1.)*pos[0]
+    acc[1] = acc[1] + 1.5*mu*J2*R**2/(r**5)*(5.*(pos[2]**2)/(r**2) - 1.)*pos[1]
+    acc[2] = acc[2] + 1.5*mu*J2*R**2/(r**5)*(5.*(pos[2]**2)/(r**2) - 3.)*pos[2]
     dx = vel.concat(acc)
     return dx
 
@@ -231,52 +231,60 @@ def main():
     x0[0] += 6678.0  # 300 km altitude
     x0[4] += np.sqrt(mu / 6678.0 * (1 + ecc))
 
+    x0 = array( [-3.1739124575097699e+03, -1.8633586574599999e+03,
+       -6.0993119956099999e+03, -5.7868603006961941e+00,
+       -2.6206083943507115e+00,  3.9037078325877248e+00] )
+    
+    tof = 3*86400.0
+
     # integrate for half the orbital period
     a = 6678 / (1 - ecc)
     with DA.cache_manager():  # optional, for efficiency
-        xf = RK78(x0, 0.0, np.pi * np.sqrt(a**3 / mu), TBP_J2)
+        xf = RK78(x0, 0.0, tof, TBP_J2)
 
-    print("*** PROPAGATION WITH RK78 FUNCTION DEFINED IN THIS EXAMPLE ***")
-    print(f"Initial conditions:\n{x0}\n")
-    print(f"Final conditions:\n{xf}\n")
-    print(f"Initial conditions (cons. part):\n{x0.cons()}\n")
-    print(f"Final conditions: (cons. part)\n{xf.cons()}\n")
+    st = 1
 
-    # Evaluate for a displaced initial condition
-    Deltax0 = np.array([1.0, -1.0, 0.0, 0.0, 0.0, 0.0])  # km
+    # print("*** PROPAGATION WITH RK78 FUNCTION DEFINED IN THIS EXAMPLE ***")
+    # print(f"Initial conditions:\n{x0}\n")
+    # print(f"Final conditions:\n{xf}\n")
+    # print(f"Initial conditions (cons. part):\n{x0.cons()}\n")
+    # print(f"Final conditions: (cons. part)\n{xf.cons()}\n")
 
-    print(f"Displaced Initial condition:\n{x0.cons() + Deltax0}\n")
-    print(f"Displaced Final condition:\n{xf.eval(Deltax0)}\n")
+    # # Evaluate for a displaced initial condition
+    # Deltax0 = np.array([1.0, -1.0, 0.0, 0.0, 0.0, 0.0])  # km
 
-    print("*** PROPAGATION WITH MODULAR RK78 PROPAGATOR ***")
-    propagator_78 = TBP_J2_integrator(RK.RK78(), array)
-    propagator_78.loadTime(0.0, np.pi * np.sqrt(a**3 / mu))
-    propagator_78.loadTol(20*1e-12, 1e-12)
-    propagator_78.loadStepSize()
+    # print(f"Displaced Initial condition:\n{x0.cons() + Deltax0}\n")
+    # print(f"Displaced Final condition:\n{xf.eval(Deltax0)}\n")
 
-    xf2=propagator_78.propagate(x0,0.0, np.pi * np.sqrt(a**3 / mu))
+    # print("*** PROPAGATION WITH MODULAR RK78 PROPAGATOR ***")
+    # propagator_78 = TBP_J2_integrator(RK.RK78(), array)
+    # propagator_78.loadTime(0.0, np.pi * np.sqrt(a**3 / mu))
+    # propagator_78.loadTol(20*1e-12, 1e-12)
+    # propagator_78.loadStepSize()
 
-    print(f"Initial conditions:\n{x0}\n")
-    print(f"Final conditions:\n{xf2}\n")
-    print(f"Initial conditions (cons. part):\n{x0.cons()}\n")
-    print(f"Final conditions: (cons. part)\n{xf2.cons()}\n")
+    # xf2=propagator_78.propagate(x0,0.0, np.pi * np.sqrt(a**3 / mu))
 
-    # Evaluate for a displaced initial condition
-    Deltax0 = np.array([25.0, -25.0, 0.0, 0.0, 0.0, 0.0])  # km
+    # print(f"Initial conditions:\n{x0}\n")
+    # print(f"Final conditions:\n{xf2}\n")
+    # print(f"Initial conditions (cons. part):\n{x0.cons()}\n")
+    # print(f"Final conditions: (cons. part)\n{xf2.cons()}\n")
 
-    # propagate the displaced initial conditions and compare it with the evaluation of the map
-    x0Displ = x0
-    x0Displ += Deltax0
-    propagator_78 = TBP_J2_integrator(RK.RK78(), array)
-    propagator_78.loadTime(0.0, np.pi * np.sqrt(a**3 / mu))
-    propagator_78.loadTol(20*1e-12, 1e-12)
-    propagator_78.loadStepSize()
+    # # Evaluate for a displaced initial condition
+    # Deltax0 = np.array([25.0, -25.0, 0.0, 0.0, 0.0, 0.0])  # km
 
-    xf3 = propagator_78.propagate(x0Displ, 0.0, np.pi * np.sqrt(a**3 / mu))
+    # # propagate the displaced initial conditions and compare it with the evaluation of the map
+    # x0Displ = x0
+    # x0Displ += Deltax0
+    # propagator_78 = TBP_J2_integrator(RK.RK78(), array)
+    # propagator_78.loadTime(0.0, np.pi * np.sqrt(a**3 / mu))
+    # propagator_78.loadTol(20*1e-12, 1e-12)
+    # propagator_78.loadStepSize()
 
-    print(f"Displaced Initial condition:\n{x0.cons() + Deltax0}\n")
-    print(f"Displaced Final condition:\n{xf2.eval(Deltax0)}\n")
-    print(f"Displaced Final condition propagated:\n{xf3.cons()}\n")
+    # xf3 = propagator_78.propagate(x0Displ, 0.0, np.pi * np.sqrt(a**3 / mu))
+
+    # print(f"Displaced Initial condition:\n{x0.cons() + Deltax0}\n")
+    # print(f"Displaced Final condition:\n{xf2.eval(Deltax0)}\n")
+    # print(f"Displaced Final condition propagated:\n{xf3.cons()}\n")
 
     st = 1
 
