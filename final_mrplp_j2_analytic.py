@@ -19,8 +19,9 @@ tof  = 3*86400.0
 # t2 = 23786.1433383453
 
 # set the parameters for the MRPLP solver
+order=5
 parameters = mrplp_J2_analytic_parameters( rr1, rr2, tof, vv1g, mu, rE, J2,
-                                            order=5, tol=1.0e-6, cont=0.0, dcontMin=0.1, scl=1.0e-3, itermax=200)
+                                            order, tol=1.0e-6, cont=0.0, dcontMin=0.1, scl=1.0e-3, itermax=200)
 
 # solve the MRPLP
 output = mrplp_J2_analytic(parameters)
@@ -61,12 +62,17 @@ errorvec = rr2DA - rr2
 error = np.linalg.norm( errorvec )
 
 # print the output
-print(f"OUTPUT SUMMARY          :")
+print(f"-------------------------------------------------------")
+print(f"                 OUTPUT SUMMARY")
+print(f"-------------------------------------------------------")
+print(f"Order of the expansion  : {order}")
 print(f"Success                 : {output.success}")
 print(f"Elapsed time            : {elapsed_time} seconds")
 print(f"Final pos. error (norm) : {error} km")
+print(f"-------------------------------------------------------")
 print(f"Delta_v1                : {dv1} km/s")
 print(f"Delta_v2                : {dv2} km/s")
 print(f"Delta_vtot              : {dvtot} km/s")
+print(f"-------------------------------------------------------")
 
 st = 1
