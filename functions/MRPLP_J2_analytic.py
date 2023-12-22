@@ -8,7 +8,7 @@ import time
 import warnings
 
 """ In this script, all the functions needed to solve the Multi-Revolution Perturbed Lambert Problem (MRPLP) are given.
-    The solution uses the analytic J2 propagation (hopefully it is sufficient...).
+    The solution uses the analytic J2 propagation (hopefully it is sufficient...) --> this is because the numerical propagation is very slow.
     The function propagatePerturbedKepler can be used to propagate the perturbed trajectory and to obtain the STM --> use this for plot purposes only. """
 
 # true to eccentric anomaly
@@ -600,7 +600,8 @@ def mrplp_J2_analytic(params: mrplp_J2_analytic_parameters):
     
     return output_mrplp_J2_analytic(vv1Sol, vv2Sol, rr2DA, res, iter, elapsed_time, success, params)
 
-def propagatePerturbedKepler( rr1: np.array, vv1: np.array, tof: float,
+# propagate in J2 dynamics and obtain the STM w.r.t. time
+def propagatePerturbedKeplerSTM( rr1: np.array, vv1: np.array, tof: float,
                              Npoints: float, params: mrplp_J2_analytic_parameters ):
 
     """ This function is used to propagate the initial state and derive the State Transition Matrix.
@@ -626,12 +627,6 @@ def propagatePerturbedKepler( rr1: np.array, vv1: np.array, tof: float,
     listState = []
     listState.append(x0DA.cons())
 
-    # state transition matrix - derivate w.r.t. time
-    # (. . .)
-
-    # initialise the list with the STM
-    # (. . .)
-
     # scaling
     x0DA[0:3] = x0DA[0:3]/Lsc
     x0DA[3:6] = x0DA[3:6]/Vsc
@@ -641,28 +636,114 @@ def propagatePerturbedKepler( rr1: np.array, vv1: np.array, tof: float,
     dt = 10.0/Tsc # step size for the propagation (s)
 
     vecttof = np.append(np.arange(dt, tof, tof/Npoints), tof)
-    for tf in vecttof:
+
+    # initialise the STM
+    STM = np.zeros((len(vecttof)+1, 6, 6))
+    for j in range(6):
+        for k in range(6):
+            if j==k:
+                STM[0,j,k] = 1.0
+            else:
+                STM[0,j,k] = 0.0
+    
+    for indtf in range(len(vecttof)):
 
         # propagate
-        xfDA = analyticJ2propHill( x0DA, tf, muSc, params.rE/Lsc, params.J2, cont+scl2*DA(4) )
+        xfDA = analyticJ2propHill( x0DA, vecttof[indtf], muSc, params.rE/Lsc, params.J2, cont+scl2*DA(4) )
 
         # scale back
         xfDA[0:3] = xfDA[0:3]*Lsc
         xfDA[3:6] = xfDA[3:6]*Vsc
 
-        # state transition matrix - derivate w.r.t. time
-        # (. . .)
-
-        # save the propagated STM
-        # (. . .)
+        # state transition matrix (STM) - derivate w.r.t. time
+        for j in range(6):
+            for k in range(6):
+                STM[indtf+1,j,k] = DA.deriv(xfDA[j],k+1).cons()
 
         # save the propagated trajectory
         listState.append(xfDA.cons())
         states = np.vstack(listState)
 
-    return states, vecttof
+    return states, np.insert(vecttof, 0, 0.0)*Tsc, STM
+
+# class of OUTPUT for primer vector initial and final conditions
+class output_primer_vector_initial_final_conditions():
+    def __init__(self, pp0: np.array, ppf: np.array, pp0dot: np.array, ppfdot: np.array,
+                  p0: float, pf: float, p0dot: float, pfdot):
+        self.pp0 = pp0
+        self.ppf = ppf
+        self.pp0dot = pp0dot
+        self.ppfdot = ppfdot
+
+        self.p0 = p0
+        self.pf = pf
+        self.p0dot = p0dot
+        self.pfdot = pfdot
+
+# class of OUTPUT for primer vector propagation
+class output_primer_vector_propagation():
+    def __init__(self, pp: np.array, p: np.array, pd: np.array,
+                 states: np.array, vecttof: np.array, STM: np.array):
+        self.pp = pp
+        self.p = p
+        self.pd = pd
+
+        self.states = states
+        self.vecttof = vecttof
+        self.STM = STM
+
+# primer vector between t1 and t2 (manoeuvres dvv1 and dvv2 located at t1 and t2)
+def primerVectorInitialAndFinalConditions(dvv1: np.array, dvv2: np.array, STM12: np.array):
+    pp0 = dvv1/np.linalg.norm(dvv1)
+    ppf = dvv2/np.linalg.norm(dvv2)
+    pp0dot = np.linalg.inv(STM12[0:3,3:6]) @ ( ppf - STM12[0:3,0:3] @ pp0 )
+    ppfdot = STM12 @ np.append( pp0, pp0dot )
+    ppfdot = ppfdot[3:6]
+
+    p0 = np.linalg.norm(pp0)
+    pf = np.linalg.norm(ppf)
+    p0dot = (pp0dot @ pp0)/p0
+    pfdot = (ppfdot @ ppf)/pf
+
+    return output_primer_vector_initial_final_conditions(pp0, ppf, pp0dot, ppfdot, p0, pf, p0dot, pfdot)
 
 
+# propagate the primer vector
+def propagatePrimerVector(rr1: np.array, vv1: np.array, tof: float,
+                          dvv1: np.array, dvv2: np.array,
+                             Npoints: float, params: mrplp_J2_analytic_parameters):
+    
+    # propagate and obtain the STM
+    states, vecttof, STM = propagatePerturbedKeplerSTM( rr1, vv1, tof, Npoints, params )
 
+    # initial and final conditions for the primer vector
+    primerVectorInitialFinalCond = primerVectorInitialAndFinalConditions(dvv1, dvv2, STM[-1,:,:])
 
+    pp0 = np.append( primerVectorInitialFinalCond.pp0, primerVectorInitialFinalCond.pp0dot )
+
+    listpp = []
+    listpp.append(pp0)
+
+    listp = []
+    listp.append(primerVectorInitialFinalCond.p0)
+
+    listpd = []
+    listpd.append(primerVectorInitialFinalCond.p0dot)
+
+    for ind in range(1, states.shape[0]):
+
+        ppcurr = STM[ind,:,:] @ pp0
+        pcurr = np.linalg.norm(ppcurr[0:3])
+        pdcurr = (ppcurr[3:6] @ ppcurr[0:3])/pcurr
+
+        listpp.append(ppcurr)
+        pp = np.vstack(listpp)
+
+        listp.append(pcurr)
+        p = np.vstack(listp)
+
+        listpd.append(pdcurr)
+        pd = np.vstack(listpd)
+
+    return output_primer_vector_propagation(pp, p.flatten(), pd.flatten(), states, vecttof, STM)
 

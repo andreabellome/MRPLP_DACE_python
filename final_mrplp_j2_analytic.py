@@ -1,5 +1,6 @@
 from functions.MRPLP_J2_analytic import *
 import numpy as np
+import matplotlib.pyplot as plt
 
 # define the constant of motion for the central body (Earth in this case)
 mu = 398600.4418  # km^3/s^2
@@ -13,7 +14,7 @@ rr2  = np.array( [6306.80758519, 3249.39062728,  794.06530085] )
 vv2 = np.array( [1.1771075218004, -0.585047636781159, -7.370399738227] )
 # vv1g = np.array( [-5.33966929176339, -2.54974554812496, 4.35921075804661] ) --> TBP-LP
 vv1g = vv1 # --> it should work also with a very brutal first guess --> usually better than TBP-LP
-tof  = 10.25*86400.0
+tof  = 3*86400.0
 # t1 = 23783.1433383453
 # t2 = 23786.1433383453
 
@@ -33,16 +34,26 @@ vv1Sol = output.vv1Sol
 vv2Sol = output.vv2Sol
 rr2DA = output.rr2DA
 
-# # propagate the entire trajectory
-# Npoints = 1000.0
-# states, vecttof = propagatePerturbedKepler( rr1, vv1Sol, tof, Npoints, parameters )
-
 # compute the DV
 dvv1 = vv1Sol - vv1
 dvv2 = vv2 - vv2Sol
 dv1 = np.linalg.norm( dvv1 )
 dv2 = np.linalg.norm( dvv2 )
 dvtot = dv1 + dv2
+
+# propagate the entire trajectory and get the STM
+Npoints = 1000.0
+output_primer_vector_propagation = propagatePrimerVector( rr1, vv1Sol, tof,
+                                                         dvv1, dvv2,
+                                                           Npoints, parameters )
+
+vectof = output_primer_vector_propagation.vecttof
+p = output_primer_vector_propagation.p
+# plt.plot(vectof, p, linestyle='-')
+# plt.show()
+
+STM12 = output_primer_vector_propagation.STM[-1,:,:] # STM between t1 and t2
+primerVectorInitialFinalCond = primerVectorInitialAndFinalConditions(dvv1, dvv2, STM12)
 
 # computational time and error on the final position
 elapsed_time = output.elapsed_time
