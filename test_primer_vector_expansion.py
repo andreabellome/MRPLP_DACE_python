@@ -86,7 +86,7 @@ x0DAepxM, xfDAexp2 = EXPpertLamb.expansionOfPerturbedLambert(stateM[0:3], stateM
 
 # evaluate the expanded states in the perturbation of rf
 drr0 = np.array( [0.0, 0.0, 0.0] ) # perturbation on rri
-drrM = np.array( [1.0, 1.0, 0.0] ) # perturbation on rri
+drrM = np.array( [0.0, 0.0, 0.0] ) # perturbation on rri
 dtM = 0.0
 dX1 = np.concatenate( [drr0, drrM, np.array([dtM])] )
 
