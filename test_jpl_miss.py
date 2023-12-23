@@ -1,5 +1,5 @@
-from functions.analytic_approx_dv_j2 import *
-from functions.MRPLP_J2_analytic import *
+from functions.analytic_approx_dv_j2 import AnalyticDVApproxJ2
+from functions.MRPLP_J2_analytic import MultiRevolutionPerturbedLambertSolver
 import numpy as np
 
 # define the constant of motion for the central body (Earth in this case)
@@ -16,15 +16,19 @@ t1 = 26272.8
 t2 = 26273.61
 tof = (t2 - t1)*86400.0
 
+# initialise classes
+MRPLPsolver = MultiRevolutionPerturbedLambertSolver() # MRPLP solver
+AnalyticDV = AnalyticDVApproxJ2()
+
 # approx. DV under J2 dynamics
-paramsApproxDV = approx_DV_parameters( rr1, vv1, rr2, vv2, t1, t2, mu, rE, J2 )
-dvApprox = approx_DV(paramsApproxDV)
+paramsApproxDV = AnalyticDV.approx_DV_parameters( rr1, vv1, rr2, vv2, t1, t2, mu, rE, J2 )
+dvApprox = AnalyticDV.approx_DV(paramsApproxDV)
 
 # set the parameters for the MRPLP solver and solve the MRPLP
 order = 5 # order of the Taylor polynomial expansion
-parameters = mrplp_J2_analytic_parameters( rr1, rr2, tof, vv1, mu, rE, J2,
+parameters =  MRPLPsolver.mrplp_J2_analytic_parameters( rr1, rr2, tof, vv1, mu, rE, J2,
                                             order, tol=1.0e-6, cont=0.0, dcontMin=0.1, scl=1.0e-3, itermax=200)
-output = mrplp_J2_analytic(parameters) # solve the MRPLP
+output =  MRPLPsolver.mrplp_J2_analytic(parameters) # solve the MRPLP
 
 # extract the solution
 vv1Sol = output.vv1Sol
