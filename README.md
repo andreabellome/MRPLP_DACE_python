@@ -24,11 +24,11 @@ The toolbox also requires the [DACEyPy](https://pypi.org/project/daceypy/) libra
 pip install daceypy
 ```
 
-## Usage
+## Usage and test cases
 
-include info on how to use the repository is provided...
+include info on how to use the repository and some test cases...
 
-```python
+<!-- ```python
 import foobar
 
 # returns 'words'
@@ -39,7 +39,7 @@ foobar.pluralize('goose')
 
 # returns 'phenomenon'
 foobar.singularize('phenomena')
-```
+``` -->
 
 ## Contributing
 
