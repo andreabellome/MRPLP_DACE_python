@@ -4,7 +4,7 @@ This folder contains scripts to solve the Multi Revolution Perturbed Lambert Pro
 
 ## Installation
 
-To work on MRPLPpy, one can simply clone the repository in local machine:
+To work with MRPLPpy, one can simply clone the repository in the local machine:
 
 ```bash
 git clone "https://github.com/andreabellome/MRPLP_DACE_python"
@@ -18,13 +18,15 @@ pip install scipy
 pip install matplotlib
 ```
 
-The toolbox also requires the [DACEyPy](https://pypi.org/project/daceypy/) library, that is a Python wrapper of [DACE](https://github.com/dacelib/dace), the Differential Algebra Computational Toolbox. Please use [pip](https://pip.pypa.io/en/stable/) to install it:
+The toolbox also requires the [DACEyPy](https://pypi.org/project/daceypy/) library, that is a Python wrapper of [DACE](https://github.com/dacelib/dace). Please use [pip](https://pip.pypa.io/en/stable/) to install it:
 
 ```bash
 pip install daceypy
 ```
 
 ## Usage
+
+include info on how to use the repository is provided...
 
 ```python
 import foobar
@@ -52,4 +54,4 @@ The work is under license [CC BY-NC-SA 4.0](https://creativecommons.org/licenses
 Armellin, R., Gondelach, D., & San Juan, J. F. (2018). 
 Multiple revolution perturbed Lambert problem solvers.
 Journal of Guidance, Control, and Dynamics, 41(9), 2019-2032.
-https://doi.org/10.2514/1.G003531
+https://doi.org/10.2514/1.G003531.

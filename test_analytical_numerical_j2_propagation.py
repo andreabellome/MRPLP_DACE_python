@@ -1,10 +1,11 @@
-from functions.MRPLP_J2_analytic import *
+from functions.MRPLP_J2_analytic import MultiRevolutionPerturbedLambertSolver
+from daceypy import DA, array
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import integrate
 
 # TBP J2 dynamics using numpy arrays
-def TBP_J2_numpy(t: float, x: np.array, mu: float, R: float, J2: float) -> array:
+def TBP_J2_numpy(t: float, x: np.array, mu: float, R: float, J2: float) -> np.array:
 
     pos = x[0:3]
     vel = x[3:6]
@@ -32,18 +33,22 @@ tof  = 3*86400.0
 # t1 = 23783.1433383453
 # t2 = 23786.1433383453
 
+
+# initialise the classes for MRPLP solver and expansion of perturbed Lambert
+MRPLPsolver = MultiRevolutionPerturbedLambertSolver() # MRPLP solver
+
 # set the parameters for the MRPLP solver
 order=5
-parameters = mrplp_J2_analytic_parameters( rr1, rr2, tof, vv1g, mu, rE, J2,
+parameters = MRPLPsolver.mrplp_J2_analytic_parameters( rr1, rr2, tof, vv1g, mu, rE, J2,
                                             order, tol=1.0e-6, cont=0.0,
                                               dcontMin=0.1, scl=1.0e-3, itermax=200)
 
 # solve the MRPLP
-output = mrplp_J2_analytic(parameters)
+output = MRPLPsolver.mrplp_J2_analytic(parameters)
 
 # double check the propagation - analytical J2 prop
 xx0 = array( np.append(rr1, output.vv1Sol) )
-xxf = analyticJ2propHill( xx0, tof, mu, rE, J2, output.paramsSol.cont )
+xxf = MRPLPsolver.analyticJ2propHill( xx0, tof, mu, rE, J2, 1.0 )
 xx0 = xx0.cons() # initial state - constant part of the Taylor expansion
 xxf = xxf.cons() # final state - constant part of the Taylor expansion
 
