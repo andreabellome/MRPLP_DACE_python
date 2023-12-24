@@ -1,10 +1,16 @@
-# MRPLP using DACE
+# MRPLPpy
 
-This folder contains script to solve the Multi Revolution Perturbed Lambert Problem (MRPLP) using Differential Algebra (DA) techniques. DA techniques are implemented using the library Differential Algebra Computational Toolbox ([DACE](https://github.com/dacelib/dace)). The work is based on the publication by Armellin et al. [[1]](#1).
+This folder contains script to solve the Multi Revolution Perturbed Lambert Problem (MRPLP) using Differential Algebra (DA) techniques in Python. DA techniques are implemented using the library Differential Algebra Computational Toolbox ([DACE](https://github.com/dacelib/dace)). The work is based on the publication by Armellin et al. [[1]](#1).
 
 ## Installation
 
-One can clone the repository in local. The toolbox uses common Python libraries: [numpy](https://numpy.org/), [scipy](https://scipy.org/) and [matplotlib](https://matplotlib.org/). If not already downloaded, please use [pip](https://pip.pypa.io/en/stable/) to do so:
+To work on MRPLPpy, one can simply clone the repository in local machine:
+
+```bash
+git clone "https://github.com/andreabellome/MRPLP_DACE_python"
+```
+
+The toolbox uses common Python libraries: [numpy](https://numpy.org/), [scipy](https://scipy.org/) and [matplotlib](https://matplotlib.org/). If not already downloaded, please use [pip](https://pip.pypa.io/en/stable/) to do so:
 
 ```bash
 pip install numpy
