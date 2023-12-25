@@ -91,7 +91,7 @@ dtM = 0.0
 dX1 = np.concatenate( [drr0, drrM, np.array([dtM])] )
 
 # evaluate the expanded states in the perturbation of rf
-drrM2 = drrM # perturbation on rri
+drrM2 = drrM                       # perturbation on rri --> this is equal to the one of the previous leg
 drr2 = np.array( [0.0, 0.0, 0.0] ) # perturbation on rri
 dt2 = 0.0
 dX2 = np.concatenate( [drrM2, drr2, np.array([dt2])] )
