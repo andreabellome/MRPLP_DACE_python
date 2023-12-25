@@ -3,10 +3,9 @@ from typing import Callable, Type
 import numpy as np
 from daceypy import DA, array
 from scipy.optimize import fsolve
-import time
-import warnings
 from functions.MRPLP_J2_analytic import MultiRevolutionPerturbedLambertSolver
 
+# this class contains the expansion of the perturbed Lambert problem solution
 class ExpansionPerturbedLambert:
     def __init__(self):
         pass

@@ -756,7 +756,6 @@ class MultiRevolutionPerturbedLambertSolver:
         Vsc = np.sqrt(params.mu/params.rE)
         Tsc = Lsc/Vsc
         muSc = params.mu/Lsc/Lsc/Lsc*Tsc*Tsc
-
         scl2 = 1.0
         cont = params.cont
 
@@ -767,10 +766,7 @@ class MultiRevolutionPerturbedLambertSolver:
         x0DA[0:3] = x0DA[0:3]/Lsc
         x0DA[3:6] = x0DA[3:6]/Vsc
 
-        # initialise the STM
-        STM = np.zeros((6, 6))
-
-        # propagate
+        # propagate with analytic J2 dynamics
         xfDA = MultiRevolutionPerturbedLambertSolver.analyticJ2propHill( x0DA, tof/Tsc, muSc, params.rE/Lsc, params.J2, 
                                                                         cont+scl2*DA(4) )
         
@@ -778,13 +774,14 @@ class MultiRevolutionPerturbedLambertSolver:
         xfDA[0:3] = xfDA[0:3]*Lsc
         xfDA[3:6] = xfDA[3:6]*Vsc
 
-        # state transition matrix (STM) - derivate w.r.t. time
+        # state transition matrix (STM)
+        STM = np.zeros((6, 6))                          # initialise the STM
         for j in range(6):
             for k in range(6):
-                STM[j,k] = DA.deriv(xfDA[j],k+1).cons()
+                STM[j,k] = DA.deriv(xfDA[j],k+1).cons() # derivate
         
+        # output
         return STM
-
 
     # propagate the primer vector
     @staticmethod

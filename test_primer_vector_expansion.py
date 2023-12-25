@@ -109,4 +109,7 @@ dv1 = np.linalg.norm(dvv1)
 dvM = np.linalg.norm(dvvM)
 dv2 = np.linalg.norm(dvv2)
 
+# ------------ STEP 4: FIND THE PERTURBATION THAT MINIMISES THE COST ------------
+
+
 st = 1
