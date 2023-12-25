@@ -64,6 +64,48 @@ vv1g = vv1 # it should work also with a very brutal first guess --> in this case
 tof = 1.5*3600.0 # time of flight (s)
 ```
 
+The class should be initialised and the input parameters are defined:
+
+```python
+# initialise the classes for MRPLP solver and expansion of perturbed Lambert
+MRPLPsolver = MultiRevolutionPerturbedLambertSolver() # MRPLP solver
+
+# set the parameters for the MRPLP solver
+order = 5 # order of the Taylor expansion
+parameters = MRPLPsolver.mrplp_J2_analytic_parameters(rr1, rr2, tof, vv1g, mu, rE, J2,
+                                            order, tol=1.0e-6, cont=0.0, dcontMin=0.1, scl=1.0e-3, itermax=200 )
+
+```
+
+The MRPLP is then solved and the outplut is printed:
+
+```python
+# extract the solution
+vv1Sol = output.vv1Sol # initial velocity on Lambert arc - km/s
+vv2Sol = output.vv2Sol # final velocity on Lambert arc - km/s
+
+# compute the DV
+dvv1 = vv1Sol - vv1          # initial DV on Lambert arc - km/s
+dvv2 = vv2 - vv2Sol          # final DV on Lambert arc - km/s
+dv1 = np.linalg.norm( dvv1 ) # initial DV magnitude on Lambert arc - km/s
+dv2 = np.linalg.norm( dvv2 ) # final DV magnitude on Lambert arc - km/s
+dvtot = dv1 + dv2            # total DV magnitude on Lambert arc - km/s
+
+# print the output
+print(f"-------------------------------------------------------")
+print(f"                 OUTPUT SUMMARY")
+print(f"-------------------------------------------------------")
+print(f"Order of the expansion  : {order}")
+print(f"Success                 : {output.success}")
+print(f"Elapsed time            : {output.elapsed_time} seconds")
+print(f"Final pos. error (norm) : {np.linalg.norm( output.rr2DA - rr2 )} km")
+print(f"-------------------------------------------------------")
+print(f"Delta_v1                : {dv1} km/s")
+print(f"Delta_v2                : {dv2} km/s")
+print(f"Delta_vtot              : {dvtot} km/s")
+print(f"-------------------------------------------------------")
+```
+
 ## Contributing
 
 Currently, only invited developers can contribute to the repository.
