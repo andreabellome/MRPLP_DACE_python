@@ -66,12 +66,12 @@ print(f"Done!")
 print(f"-------------------------------------------------------")
 
 # extract the propagated trajectory and the primer vector
-states = output_primer_vector_propagation.states
-vectof = output_primer_vector_propagation.vecttof
-p = output_primer_vector_propagation.p # primer vector magnitude history
-pd = output_primer_vector_propagation.pd # primer vector derivative history
+states = output_primer_vector_propagation.states  # trajectory of the spacecraft
+vectof = output_primer_vector_propagation.vecttof # times
+p = output_primer_vector_propagation.p            # primer vector magnitude history
+pd = output_primer_vector_propagation.pd          # primer vector derivative history
 
-pmax = np.amax(p) # maximum of the primer vector
+pmax = np.amax(p)    # maximum of the primer vector
 index = np.argmax(p) # index of the maximum of the primer vector
 
 # find the state and time at the maximum of the primer vector

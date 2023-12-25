@@ -44,6 +44,20 @@ dv1 = np.linalg.norm( dvv1 )
 dv2 = np.linalg.norm( dvv2 )
 dvtot = dv1 + dv2
 
+# print the output
+print(f"-------------------------------------------------------")
+print(f"                 OUTPUT SUMMARY")
+print(f"-------------------------------------------------------")
+print(f"Order of the expansion  : {order}")
+print(f"Success                 : {output.success}")
+print(f"Elapsed time            : {output.elapsed_time} seconds")
+print(f"Final pos. error (norm) : {np.linalg.norm( output.rr2DA - rr2 )} km")
+print(f"-------------------------------------------------------")
+print(f"Delta_v1                : {dv1} km/s")
+print(f"Delta_v2                : {dv2} km/s")
+print(f"Delta_vtot              : {dvtot} km/s")
+print(f"-------------------------------------------------------")
+
 # expansion w.r.t. (ri, rf, tof)
 parameters.order = 7 # increase the order of the expansion just in case (this will increase computational time)
 x0DAepx, xfDAexp = EXPpertLamb.expansionOfPerturbedLambert(rr1, vv1Sol, tof, parameters)
@@ -60,57 +74,44 @@ xfReference = np.concatenate( [rr2, vv2Sol] )
 x0DAepxEval = x0DAepx.eval( dX )
 xfDAexpEval = xfDAexp.eval( dX )
 
+# # propagate the entire trajectory and get the STM
+# Npoints = 1000.0
+# output_primer_vector_propagation = MRPLPsolver.propagatePrimerVector( rr1, vv1Sol, tof, dvv1, dvv2, Npoints, parameters )
 
-# propagate the entire trajectory and get the STM
-Npoints = 1000.0
-output_primer_vector_propagation = MRPLPsolver.propagatePrimerVector( rr1, vv1Sol, tof, dvv1, dvv2, Npoints, parameters )
+# # extract the propagated primer vector
+# vectof = output_primer_vector_propagation.vecttof
+# p = output_primer_vector_propagation.p # primer vector magnitude history
+# pd = output_primer_vector_propagation.pd # primer vector derivative history
 
-# extract the propagated primer vector
-vectof = output_primer_vector_propagation.vecttof
-p = output_primer_vector_propagation.p # primer vector magnitude history
-pd = output_primer_vector_propagation.pd # primer vector derivative history
+# pmax = np.amax(p) # maximum of the primer vector
+# index = np.argmax(p) # index of the maximum of the primer vector
 
-pmax = np.amax(p) # maximum of the primer vector
-index = np.argmax(p) # index of the maximum of the primer vector
+# # plot the primer vector magnitude
+# plt.subplot(2, 1, 1)
+# plt.plot(vectof/3600.0, p, linestyle='-', color = 'blue')
+# plt.plot(vectof[0]/3600.0, p[0], marker='*', color='red')
+# plt.plot(vectof[-1]/3600.0, p[-1], marker='*', color='red')
+# plt.plot(vectof[index]/3600.0, p[index], marker='*', color='red')
+# plt.xlabel('Time of flight (hours)')
+# plt.ylabel('Primer vector magnitude')
 
-# plot the primer vector magnitude
-plt.plot(vectof/3600.0, p, linestyle='-', color = 'blue')
-plt.plot(vectof[0]/3600.0, p[0], marker='*', color='red')
-plt.plot(vectof[-1]/3600.0, p[-1], marker='*', color='red')
-plt.plot(vectof[index]/3600.0, p[index], marker='*', color='red')
-plt.xlabel('Time of flight (hours)')
-plt.ylabel('Primer vector magnitude')
-plt.show()
+# # plot the primer vector derivative
+# plt.subplot(2, 1, 2)
+# plt.plot(vectof/3600.0, pd, linestyle='-', color = 'blue')
+# plt.plot(vectof[0]/3600.0, pd[0], marker='*', color='red')
+# plt.plot(vectof[-1]/3600.0, pd[-1], marker='*', color='red')
+# plt.plot(vectof[index]/3600.0, pd[index], marker='*', color='red')
+# plt.xlabel('Time of flight (hours)')
+# plt.ylabel('Primer vector derivative')
 
-# plot the primer vector derivative
-plt.plot(vectof/3600.0, pd, linestyle='-', color = 'blue')
-plt.plot(vectof[0]/3600.0, pd[0], marker='*', color='red')
-plt.plot(vectof[-1]/3600.0, pd[-1], marker='*', color='red')
-plt.plot(vectof[index]/3600.0, pd[index], marker='*', color='red')
-plt.xlabel('Time of flight (hours)')
-plt.ylabel('Primer vector derivative')
-plt.show()
+# # adjust layout for better spacing
+# plt.tight_layout()
 
-STM12 = output_primer_vector_propagation.STM[-1,:,:] # STM between t1 and t2
-primerVectorInitialFinalCond = MRPLPsolver.primerVectorInitialAndFinalConditions(dvv1, dvv2, STM12)
+# # show the plots
+# plt.show()
 
-# computational time and error on the final position
-elapsed_time = output.elapsed_time
-errorvec = rr2DA - rr2
-error = np.linalg.norm( errorvec )
-
-# print the output
-print(f"-------------------------------------------------------")
-print(f"                 OUTPUT SUMMARY")
-print(f"-------------------------------------------------------")
-print(f"Order of the expansion  : {order}")
-print(f"Success                 : {output.success}")
-print(f"Elapsed time            : {elapsed_time} seconds")
-print(f"Final pos. error (norm) : {error} km")
-print(f"-------------------------------------------------------")
-print(f"Delta_v1                : {dv1} km/s")
-print(f"Delta_v2                : {dv2} km/s")
-print(f"Delta_vtot              : {dvtot} km/s")
-print(f"-------------------------------------------------------")
+# STM12 = output_primer_vector_propagation.STM[-1,:,:] # STM between t1 and t2
+STM12check = MRPLPsolver.stateTransitionMatrix( rr1, vv1Sol, tof, parameters )
+primerVectorInitialFinalCond = MRPLPsolver.primerVectorInitialAndFinalConditions(dvv1, dvv2, STM12check)
 
 st = 1

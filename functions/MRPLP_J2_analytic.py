@@ -727,18 +727,63 @@ class MultiRevolutionPerturbedLambertSolver:
     # primer vector between t1 and t2 (manoeuvres dvv1 and dvv2 located at t1 and t2)
     @staticmethod
     def primerVectorInitialAndFinalConditions(dvv1: np.array, dvv2: np.array, STM12: np.array):
-        pp0 = dvv1/np.linalg.norm(dvv1)
-        ppf = dvv2/np.linalg.norm(dvv2)
-        pp0dot = np.linalg.inv(STM12[0:3,3:6]) @ ( ppf - STM12[0:3,0:3] @ pp0 )
-        ppfdot = STM12 @ np.append( pp0, pp0dot )
-        ppfdot = ppfdot[3:6]
 
-        p0 = np.linalg.norm(pp0)
-        pf = np.linalg.norm(ppf)
-        p0dot = (pp0dot @ pp0)/p0
-        pfdot = (ppfdot @ ppf)/pf
+        # primer vector and derivatives
+        pp0 = dvv1/np.linalg.norm(dvv1)                                         # initial primer vector
+        ppf = dvv2/np.linalg.norm(dvv2)                                         # final primer vector
+        pp0dot = np.linalg.inv(STM12[0:3,3:6]) @ ( ppf - STM12[0:3,0:3] @ pp0 ) # initial primer vector derivative
+        ppfdot = STM12 @ np.append( pp0, pp0dot ) 
+        ppfdot = ppfdot[3:6]                                                    # final primer vector derivative
 
+        # magnitude of primer vector and derivative
+        p0 = np.linalg.norm(pp0)   # initial primer vector magnitude
+        pf = np.linalg.norm(ppf)   # final primer vector magnitude
+        p0dot = (pp0dot @ pp0)/p0  # initial primer vector derivative
+        pfdot = (ppfdot @ ppf)/pf  # final primer vector derivative
+
+        # output primer vector initial and final conditions
         return MultiRevolutionPerturbedLambertSolver.output_primer_vector_initial_final_conditions(pp0, ppf, pp0dot, ppfdot, p0, pf, p0dot, pfdot)
+
+    # obtain STM between t1 and t2 --> tof = t2 - t1
+    @staticmethod
+    def stateTransitionMatrix(rr1: np.array, vv1: np.array, tof: float, params: mrplp_J2_analytic_parameters):
+
+        # initialise DA variables --> DA.init(order, num_variables)
+        DA.init( params.order, 6 )
+
+        # scaling
+        Lsc = params.rE
+        Vsc = np.sqrt(params.mu/params.rE)
+        Tsc = Lsc/Vsc
+        muSc = params.mu/Lsc/Lsc/Lsc*Tsc*Tsc
+
+        scl2 = 1.0
+        cont = params.cont
+
+        # DA expansion around the initial state
+        x0DA = array( [rr1[0]+DA(1), rr1[1]+DA(2), rr1[2]+DA(3), vv1[0]+DA(4), vv1[1]+DA(5), vv1[2]+DA(6)] )
+
+        # scaling
+        x0DA[0:3] = x0DA[0:3]/Lsc
+        x0DA[3:6] = x0DA[3:6]/Vsc
+
+        # initialise the STM
+        STM = np.zeros((6, 6))
+
+        # propagate
+        xfDA = MultiRevolutionPerturbedLambertSolver.analyticJ2propHill( x0DA, tof/Tsc, muSc, params.rE/Lsc, params.J2, 
+                                                                        cont+scl2*DA(4) )
+        
+        # scale back
+        xfDA[0:3] = xfDA[0:3]*Lsc
+        xfDA[3:6] = xfDA[3:6]*Vsc
+
+        # state transition matrix (STM) - derivate w.r.t. time
+        for j in range(6):
+            for k in range(6):
+                STM[j,k] = DA.deriv(xfDA[j],k+1).cons()
+        
+        return STM
 
 
     # propagate the primer vector
