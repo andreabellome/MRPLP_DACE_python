@@ -26,20 +26,43 @@ pip install daceypy
 
 ## Usage and test cases
 
-include info on how to use the repository and some test cases...
+To use the repository, one finds two different test scripts.
 
-<!-- ```python
-import foobar
+### Test script 1: solving the MRPLP using DACE
 
-# returns 'words'
-foobar.pluralize('word')
+The reference script is: [final_mrplp_j2_analytic.py](https://github.com/andreabellome/MRPLP_DACE_python/blob/main/final_mrplp_j2_analytic.py). This script is used to solve the MRPLP using DA techniques. It all starts by including the required libraries:
 
-# returns 'geese'
-foobar.pluralize('goose')
+```python
+from functions.MRPLP_J2_analytic import MultiRevolutionPerturbedLambertSolver
+from functions.expansion_perturbed_lambert import ExpansionPerturbedLambert
+```
 
-# returns 'phenomenon'
-foobar.singularize('phenomena')
-``` -->
+that are used to access classes to solve the MRPLP and to expand the solution.
+
+One then loads common Python libraries:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+```
+
+The constants of motion are defined, as well as initial and final states and time of flight to solve the MRPLP:
+
+```python
+# define the constant of motion for the central body (Earth in this case)
+mu = 398600.4418  # km^3/s^2
+J2 = 1.08262668e-3
+rE = 6378.137 # km
+
+# initial guess, target position and time of flight
+rr1  = np.array( [-3173.91245750977, -1863.35865746, -6099.31199561] ) # initial position - (km)
+vv1 = np.array( [-6.37541145277431, -1.26857476842513, 3.70632783068748] ) # initial velocity - (km/s)
+rr2  = np.array( [6306.80758519, 3249.39062728,  794.06530085] ) # final position - (km)
+vv2 = np.array( [1.1771075218004, -0.585047636781159, -7.370399738227] ) # final velocity - (km/s)
+
+vv1g = vv1 # it should work also with a very brutal first guess --> in this case the initial velocity
+tof = 1.5*3600.0 # time of flight (s)
+```
 
 ## Contributing
 
