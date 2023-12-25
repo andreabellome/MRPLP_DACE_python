@@ -60,11 +60,7 @@ vv1 = np.array( [-6.37541145277431, -1.26857476842513, 3.70632783068748] ) # ini
 rr2  = np.array( [6306.80758519, 3249.39062728,  794.06530085] ) # final position - (km)
 vv2 = np.array( [1.1771075218004, -0.585047636781159, -7.370399738227] ) # final velocity - (km/s)
 
-<<<<<<< HEAD
 vv1g = vv1 # it should work also with a very brutal first guess --> in this case the initial velocity
-=======
-vv1g = vv1 # --> it should work also with a very brutal first guess
->>>>>>> 4c4dad55b1290fad5b16a8220011104e974d5917
 tof = 1.5*3600.0 # time of flight (s)
 ```
 
