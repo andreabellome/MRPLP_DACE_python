@@ -106,6 +106,23 @@ print(f"Delta_vtot              : {dvtot} km/s")
 print(f"-------------------------------------------------------")
 ```
 
+The printed summary will look like the following:
+
+```bash
+-------------------------------------------------------
+                 OUTPUT SUMMARY
+-------------------------------------------------------
+Order of the expansion  : 5
+Success                 : True
+Elapsed time            : 0.1555500030517578 seconds
+Final pos. error (norm) : 5.963966430719651e-11 km
+-------------------------------------------------------
+Delta_v1                : 2.1191021863094743 km/s
+Delta_v2                : 1.4891976119021597 km/s
+Delta_vtot              : 3.6082997982116343 km/s
+-------------------------------------------------------
+```
+
 ## Contributing
 
 Currently, only invited developers can contribute to the repository.
