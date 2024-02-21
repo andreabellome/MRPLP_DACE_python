@@ -24,6 +24,8 @@ The toolbox also requires the [DACEyPy](https://pypi.org/project/daceypy/) libra
 pip install daceypy
 ```
 
+To cite this work, refer to Armellin et al. [[1]](#1).
+
 ## Usage and test cases
 
 To use the repository, one finds two different test scripts.
