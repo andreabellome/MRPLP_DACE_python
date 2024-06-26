@@ -20,19 +20,6 @@ class MultiRevolutionPerturbedLambertSolver:
     # true to eccentric anomaly
     @staticmethod
     def true2eccAnomaly(theta: DA, e: DA):
-        """
-        The function `true2eccAnomaly` calculates the eccentric anomaly from the true anomaly and
-        eccentricity values.
-
-        :param theta: The parameter `theta` represents the true anomaly in radians
-        :type theta: DA
-        :param e: The parameter `e` in the `true2eccAnomaly` method appears to represent the
-        eccentricity of an orbit. Eccentricity is a measure of how elongated or flattened an orbit is.
-        It is a dimensionless parameter that ranges between 0 (for a circular orbit) and
-        :type e: DA
-        :return: The method `true2eccAnomaly` is returning the eccentric anomaly calculated using the
-        given formula.
-        """
         return 2.0 * np.arctan2(
             np.sqrt(1.0 - e) * np.sin(theta / 2.0),
             np.sqrt(1.0 + e) * np.cos(theta / 2.0),
@@ -41,21 +28,6 @@ class MultiRevolutionPerturbedLambertSolver:
     # true to mean anomaly
     @staticmethod
     def true2meanAnomaly(theta: DA, e: DA):
-        """
-        The function calculates the mean anomaly from the true anomaly and eccentricity.
-
-        :param theta: The parameter `theta` typically represents the true anomaly in orbital mechanics.
-        True anomaly is the angle between the periapsis (closest point to the focus) and the current
-        position of an object in its orbit, as measured at the focus of the orbital ellipse
-        :type theta: DA
-        :param e: The parameter `e` typically represents the eccentricity of an orbit in orbital
-        mechanics. The eccentricity of an orbit is a measure of how much the orbit deviates from a
-        perfect circle. It is a dimensionless parameter that ranges from 0 (circular orbit) to 1
-        (parabolic
-        :type e: DA
-        :return: The function `true2meanAnomaly(theta, e)` is returning the mean anomaly calculated as
-        `E - e*np.sin(E)`.
-        """
         E = MultiRevolutionPerturbedLambertSolver.true2eccAnomaly(theta, e)
         return E - e * np.sin(E)
 
