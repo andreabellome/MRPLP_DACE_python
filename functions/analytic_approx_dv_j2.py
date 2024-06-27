@@ -1,6 +1,6 @@
 import numpy as np
 
-""" In this class, all the functions needed to provie the approximate DV in Earth-related J2 dynamics as from:
+""" In this class, all the functions needed to provie the approximate ΔV in Earth-related J2 dynamics as from:
     'Shen, H. X., & Casalino, L. (2021). Simple ΔV approximation for optimization of debris-to-debris transfers. Journal of Spacecraft and Rockets, 58(2), 575-580. https://doi.org/10.2514/1.A34831' """
 
 class AnalyticDVApproxJ2:
