@@ -14,12 +14,37 @@ import warnings
 # The `MultiRevolutionPerturbedLambertSolver` class provides methods for solving Lambert's problem
 # with perturbations using analytic J2 propagation and primer vector techniques.
 class MultiRevolutionPerturbedLambertSolver:
+
+    """
+    MultiRevolutionPerturbedLambertSolver: A class to solve the Multi-Revolution Perturbed Lambert Problem (MRPLP).
+
+    This class provides methods to solve Lambert's problem with perturbations using analytic J2 propagation
+    and primer vector techniques.
+
+    Notes:
+        The solution uses analytic J2 propagation due to the slow nature of numerical propagation.
+        The function propagatePerturbedKepler can be used to propagate the perturbed trajectory and to obtain the
+        state transition matrix (STM); recommended for plotting purposes only.
+    """
+
     def __init__(self):
         pass
 
     # true to eccentric anomaly
     @staticmethod
     def true2eccAnomaly(theta: DA, e: DA):
+
+        """
+        Convert true anomaly to eccentric anomaly using the given eccentricity.
+
+        Args:
+            theta (DA): True anomaly.
+            e (DA): Eccentricity.
+
+        Returns:
+            DA: Eccentric anomaly.
+        """
+
         return 2.0 * np.arctan2(
             np.sqrt(1.0 - e) * np.sin(theta / 2.0),
             np.sqrt(1.0 + e) * np.cos(theta / 2.0),
@@ -28,12 +53,35 @@ class MultiRevolutionPerturbedLambertSolver:
     # true to mean anomaly
     @staticmethod
     def true2meanAnomaly(theta: DA, e: DA):
+
+        """
+        Convert true anomaly to mean anomaly using the given eccentricity.
+
+        Args:
+            theta (DA): True anomaly.
+            e (DA): Eccentricity.
+
+        Returns:
+            DA: Mean anomaly.
+        """
+
+
         E = MultiRevolutionPerturbedLambertSolver.true2eccAnomaly(theta, e)
         return E - e * np.sin(E)
 
     # mean to eccentric anomaly
     @staticmethod
     def mean2eccAnomaly(M: DA, e: DA):
+        """
+        Convert mean anomaly to eccentric anomaly using the given eccentricity.
+
+        Args:
+            M (DA): Mean anomaly.
+            e (DA): Eccentricity.
+
+        Returns:
+            DA: Eccentric anomaly.
+        """
         E = M
         for i in range(20):
             E = M + e * np.sin(E)
@@ -43,6 +91,16 @@ class MultiRevolutionPerturbedLambertSolver:
     # eccentric to true anomaly
     @staticmethod
     def ecc2trueAnomaly(E: DA, e: DA):
+        """
+        Convert eccentric anomaly to true anomaly using the given eccentricity.
+
+        Args:
+            E (DA): Mean anomaly.
+            e (DA): Eccentricity.
+
+        Returns:
+            DA: True anomaly.
+        """
         return 2.0 * np.arctan2(
             np.sqrt(1.0 + e) * np.sin(E / 2.0), np.sqrt(1.0 - e) * np.cos(E / 2.0)
         )
@@ -50,12 +108,33 @@ class MultiRevolutionPerturbedLambertSolver:
     # mean to true anomaly
     @staticmethod
     def mean2trueAnomaly(M: DA, e: DA):
+        """
+        Convert mean anomaly to true anomaly using the given eccentricity.
+
+        Args:
+            M (DA): Mean anomaly.
+            e (DA): Eccentricity.
+
+        Returns:
+            DA: True anomaly.
+        """
         E = MultiRevolutionPerturbedLambertSolver.mean2eccAnomaly(M, e)
         return MultiRevolutionPerturbedLambertSolver.ecc2trueAnomaly(E, e)
 
     # cartesian elements to keplerian
     @staticmethod
     def cart2kep(x0: array, mu: float):
+        """
+        Convert Cartesian elements to Keplerian elements.
+
+        Parameters:
+        x0 (array): Cartesian elements [x, y, z, vx, vy, vz].
+        mu (float): Standard gravitational parameter.
+
+        Returns:
+        array: Keplerian elements [a, e, i, RAAN, omega, theta].
+        """
+
         x0 = x0.copy()
 
         rr = x0[0:3]
@@ -168,6 +247,16 @@ class MultiRevolutionPerturbedLambertSolver:
 
     # keplerian elements to Hill
     def kep2Hill(kep: array, mu: float):
+        """
+        Convert Keplerian elements to Hill coordinates.
+
+        Parameters:
+        kep (array): Keplerian elements [a, e, i, RAAN, omega, theta].
+        mu (float): Standard gravitational parameter.
+
+        Returns:
+        array: Hill coordinates [l, g, h, L, G, H].
+        """
 
         hill = array.zeros(6)
         p = kep[0] * (1.0 - kep[1] * kep[1])
