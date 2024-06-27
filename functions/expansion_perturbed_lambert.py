@@ -7,12 +7,32 @@ from functions.MRPLP_J2_analytic import MultiRevolutionPerturbedLambertSolver
 
 # this class contains the expansion of the perturbed Lambert problem solution
 class ExpansionPerturbedLambert:
+    """
+    Class for expanding the solution of the perturbed Lambert problem around given initial conditions and time of flight (tof).
+    Provides methods for analytical J2 propagation and expanding the dynamics of the perturbed Lambert problem.
+    """
+
     def __init__(self):
         pass
 
     # analytic J2 propagation --> in this case also the time of flight (tof) is a DA variable
     @staticmethod
     def analyticJ2propHill( x0: array, tof: array, mu: float, rE: float, J2: float, cont: float ):
+
+        """
+        Analytical J2 propagation in Hill coordinates.
+
+        Args:
+        - x0 (array): Initial state vector in Cartesian coordinates [position, velocity].
+        - tof (array): Time of flight as a DA variable.
+        - mu (float): Gravitational parameter.
+        - rE (float): Radius of the central body.
+        - J2 (float): J2 coefficient of the central body.
+        - cont (float): Continuation condition.
+
+        Returns:
+        - xxf (array): Final state vector in Cartesian coordinates after propagation.
+        """
         
         # cartesian to keplerian elements
         kep0 = MultiRevolutionPerturbedLambertSolver.cart2kep(x0, mu)
@@ -44,7 +64,19 @@ class ExpansionPerturbedLambert:
     @staticmethod
     def expansionOfPerturbedLambert(rr1: np.array, vv1: np.array, tof: float, params):
 
-        """ Perform the expansion of the pertubed dynamics around (rr1, rr2, tof). In this way, one can evaluate the effect of perturbations on (rr1, rr2, tof) on the initial and final velocity (vv1, vv2). The state (rr2, vv2) is obtained propagating forward the state (rr1, vv1) for the time of flight (tof).  """
+        """
+        Perform the expansion of the perturbed Lambert dynamics around (rr1, vv2, tof).
+
+        Args:
+        - rr1 (np.array): Initial position vector.
+        - vv1 (np.array): Initial velocity vector.
+        - tof (float): Time of flight in seconds.
+        - params: Parameters for scaling and continuation conditions.
+
+        Returns:
+        - x0DA (np.array): Initial state vector after expansion.
+        - xfDA (np.array): Final state vector after propagation and expansion.
+        """
 
         # initialise DA variables --> DA.init(order, num_variables)
         DA.init( params.order, 7 ) # (rr1, vv1, tof)
@@ -87,7 +119,5 @@ class ExpansionPerturbedLambert:
         x0DA[3:6] = x0DA[3:6]*Vsc
         xfDA[0:3] = xfDA[0:3]*Lsc
         xfDA[3:6] = xfDA[3:6]*Vsc
-
-        st = 1
 
         return x0DA, xfDA
