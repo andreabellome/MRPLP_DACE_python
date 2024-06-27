@@ -1,26 +1,64 @@
 import numpy as np
 
-""" In this class, all the functions needed to provie the approximate ΔV in Earth-related J2 dynamics as from:
-    'Shen, H. X., & Casalino, L. (2021). Simple ΔV approximation for optimization of debris-to-debris transfers. Journal of Spacecraft and Rockets, 58(2), 575-580. https://doi.org/10.2514/1.A34831' """
-
 class AnalyticDVApproxJ2:
+    """
+    This class provides functions for approximate ΔV calculation in Earth-related J2 dynamics.
+    
+    Reference:
+    Shen, H. X., & Casalino, L. (2021). Simple ΔV approximation for optimization of debris-to-debris transfers. 
+    Journal of Spacecraft and Rockets, 58(2), 575-580. https://doi.org/10.2514/1.A34831
+    """
+
     def __init__(self):
         pass
 
     # true to eccentric anomaly
     @staticmethod
     def true2eccAnomaly_numpy( theta: float, e: float ):
+        """
+        Convert true anomaly to eccentric anomaly using numpy functions.
+
+        Args:
+        - theta (float): True anomaly in radians.
+        - e (float): Eccentricity of the orbit.
+
+        Returns:
+        - float: Eccentric anomaly in radians.
+        """
+
         return 2.0 * np.arctan2(np.sqrt(1. - e)*np.sin(theta / 2.), np.sqrt(1. + e) * np.cos(theta / 2.))
 
     # true to mean anomaly
     @staticmethod
     def true2meanAnomaly_numpy(theta: float, e: float):
+        """
+        Convert true anomaly to mean anomaly using numpy functions.
+
+        Args:
+        - theta (float): True anomaly in radians.
+        - e (float): Eccentricity of the orbit.
+
+        Returns:
+        - float: Mean anomaly in radians.
+        """
+
         E = AnalyticDVApproxJ2.true2eccAnomaly_numpy(theta, e)
         return E - e*np.sin(E)
 
     # mean to eccentric anomaly
     @staticmethod
     def mean2eccAnomaly_numpy( M: float, e: float ):
+        """
+        Convert mean anomaly to eccentric anomaly using numerical iteration with numpy functions.
+
+        Args:
+        - M (float): Mean anomaly in radians.
+        - e (float): Eccentricity of the orbit.
+
+        Returns:
+        - float: Eccentric anomaly in radians.
+        """
+
         E = M
         for i in range(20):
             E = M + e*np.sin(E)
@@ -30,16 +68,55 @@ class AnalyticDVApproxJ2:
     # eccentric to true anomaly
     @staticmethod
     def ecc2trueAnomaly_numpy( E: float, e: float ):
+        """
+        Convert eccentric anomaly to true anomaly using numpy functions.
+
+        Args:
+        - E (float): Eccentric anomaly in radians.
+        - e (float): Eccentricity of the orbit.
+
+        Returns:
+        - float: True anomaly in radians.
+        """
+
         return 2.0 * np.arctan2(np.sqrt(1. + e)*np.sin(E / 2.), np.sqrt(1. - e) * np.cos(E / 2.))
 
     # mean to true anomaly
     @staticmethod
     def mean2trueAnomaly_numpy( M: float, e: float ):
+
+        """
+        Convert mean anomaly to true anomaly using numerical methods with numpy functions.
+
+        Args:
+        - M (float): Mean anomaly in radians.
+        - e (float): Eccentricity of the orbit.
+
+        Returns:
+        - float: True anomaly in radians.
+        """
+
         E = AnalyticDVApproxJ2.mean2eccAnomaly_numpy(M, e)
         return AnalyticDVApproxJ2.ecc2trueAnomaly_numpy(E, e)
 
     # class of INPUT for approx. DV under Earth-J2 dynamics
     class approx_DV_parameters():
+
+        """
+        Class representing input parameters for approximate ΔV calculation under Earth-J2 dynamics.
+
+        Attributes:
+        - rr1 (np.array): Initial position vector at time t1 (km).
+        - vv1 (np.array): Initial velocity vector at time t1 (km/s).
+        - rr2 (np.array): Final position vector at time t2 (km).
+        - vv2 (np.array): Final velocity vector at time t2 (km/s).
+        - t1 (float): Initial epoch in Modified Julian Date 2000 (MJD2000).
+        - t2 (float): Final epoch in Modified Julian Date 2000 (MJD2000).
+        - mu (float): Gravitational parameter (km3/s2).
+        - rE (float): Radius of the central body (km).
+        - J2 (float): J2 coefficient of the central body.
+        """
+
         def __init__(self, rr1: np.array, vv1: np.array, rr2: np.array, vv2: np.array,
                     t1: float, t2: float,
                         mu: float, rE: float, J2: float):
@@ -57,6 +134,17 @@ class AnalyticDVApproxJ2:
             self.J2 = J2 # J2 of the central body
 
     class output_meanPropJ2_numpy():
+
+        """
+        Class representing output of mean propagation under J2 dynamics in Keplerian elements.
+
+        Attributes:
+        - kep (np.array): Keplerian elements [a, e, i, RAAN, omega, theta].
+        - cart (np.array): Cartesian elements [x, y, z, vx, vy, vz].
+        - Omdot (float): Rate of change of right ascension of the ascending node (rad/s).
+        - omdot (float): Rate of change of argument of perigee (rad/s).
+        """
+
         def __init__(self, kep: np.array, cart: np.array,
                     Omdot: float, omdot: float):
             self.kep = kep
@@ -67,6 +155,18 @@ class AnalyticDVApproxJ2:
     # cartesian elements to keplerian
     @staticmethod
     def cart2kep_numpy(x0: np.array, mu: float):
+
+        """
+        Convert Cartesian elements to Keplerian elements using numpy functions.
+
+        Args:
+        - x0 (np.array): State vector [rx, ry, rz, vx, vy, vz].
+        - mu (float): Gravitational parameter (km3/s2).
+
+        Returns:
+        - np.array: Keplerian elements [a, e, i, RAAN, omega, theta].
+        """
+
         x0 = x0.copy()
 
         rr = x0[0:3]
@@ -167,6 +267,19 @@ class AnalyticDVApproxJ2:
     @staticmethod
     def meanPropJ2_numpy(rr1: np.array, vv1: np.array, tof: float, parameters: approx_DV_parameters):
 
+        """
+        Perform mean propagation under J2 dynamics and return Keplerian elements and related rates of change.
+
+        Args:
+        - rr1 (np.array): Initial position vector at time t1 (km).
+        - vv1 (np.array): Initial velocity vector at time t1 (km/s).
+        - tof (float): Time of flight (s).
+        - parameters (approx_DV_parameters): Input parameters.
+
+        Returns:
+        - output_meanPropJ2_numpy: Output containing Keplerian elements and rates of change.
+        """
+
         state1 = np.append( rr1, vv1 )
         kep1 = AnalyticDVApproxJ2.cart2kep_numpy( state1, parameters.mu )
         a = kep1[0]
@@ -227,6 +340,16 @@ class AnalyticDVApproxJ2:
     # approx. DV calculation
     @staticmethod
     def approx_DV(parameters: approx_DV_parameters):
+
+        """
+        Perform approximate ΔV calculation using input parameters.
+
+        Args:
+        - parameters (approx_DV_parameters): Input parameters for ΔV calculation.
+
+        Returns:
+        - float: Approximate ΔV magnitude (km/s).
+        """
 
         # time of flight - (s)
         tof = ( parameters.t2 - parameters.t1 )*86400.0
