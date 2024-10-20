@@ -925,7 +925,7 @@ class MultiRevolutionPerturbedLambertSolver:
         Use this script for plot purposes only."""
 
         # initialise DA variables --> DA.init(order, num_variables)
-        DA.init(params.order, 6)
+        DA.init(params.order, 7)
 
         # scaling
         Lsc = params.rE
@@ -981,7 +981,7 @@ class MultiRevolutionPerturbedLambertSolver:
                 muSc,
                 params.rE / Lsc,
                 params.J2,
-                cont + scl2 * DA(4),
+                cont + scl2 * DA(7),
             )
 
             # scale back
