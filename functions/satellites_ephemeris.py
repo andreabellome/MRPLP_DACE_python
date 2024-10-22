@@ -178,7 +178,7 @@ class SatelliteEphemeris:
                         debris[ind][0] = str(int(debris[ind][0]))
                     
                     self.debris = debris
-                    print('Custom database loaded.')
+                    print(f'Custom database loaded: {self.filename}')
 
                 else:
 
@@ -207,7 +207,7 @@ class SatelliteEphemeris:
                     for ind, deb in enumerate(self.debris):
                         self.debris[ind][0] = str(ind)
                         
-                    print('Custom database loaded.')
+                    print(f'Custom database loaded: {self.filename}')
             else:
                 # Load default debris data from the Debris.txt file in the ephemerides folder
                 base_dir = os.path.dirname(__file__)  # Get the directory of the current script
