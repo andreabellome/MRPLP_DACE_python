@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import json
 import os
 
 class SatelliteEphemeris:
@@ -131,33 +132,82 @@ class SatelliteEphemeris:
         Load the satellite data from the provided Excel file or a default debris file.
         """
         try:
+            
             if self.filename:
-                # Read satellite data from Excel file
-                sats = pd.read_excel(self.filename)
-                idsats = sats.iloc[:, 0].astype(str)  # Keep satellite IDs as strings
 
-                coes = sats.iloc[:, 4:10].to_numpy()  # Orbital elements (columns 5 to 10)
-                coes[:, 2:6] = self.deg2rad(coes[:, 2:6])  # Convert degrees to radians (columns 3 to 6)
+                if self.filename[-4:] == "json":
+                    file_path = self.filename
 
-                # Convert dates to Julian Date and then to MJD2000
-                dates = pd.to_datetime(sats.iloc[:, 2])  # Column 3 contains dates
+                    with open(file_path, 'r') as file:
+                        data = json.load(file)
 
-                epoch_list = []
-                for date in dates:
-                    if not isinstance(date, pd.Timestamp):
-                        date = pd.Timestamp(date)
-                        epoch_list.append(self.timestamp_to_mjd2000(date))
-                    else:
-                        epoch_list.append(self.timestamp_to_mjd2000(date))
-                epochs = np.array(epoch_list)
+                    idsats = []
+                    epochs = []
+                    coes = []
+                    for index, sat_elem in enumerate(data):
 
-                # Create debris matrix with IDs, epochs, and orbital elements (coes)
-                self.debris = np.column_stack((idsats, epochs, coes))
+                        idsats.append(index)
 
-                for ind, deb in enumerate(self.debris):
-                    self.debris[ind][0] = str(ind)
+                        sma = float(sat_elem["SEMIMAJOR_AXIS"]) * 1000
+                        ecc = float(sat_elem["ECCENTRICITY"])
+                        inc = float(sat_elem["INCLINATION"])
+                        Om  = float(sat_elem["RA_OF_ASC_NODE"])
+                        om  = float(sat_elem["ARG_OF_PERICENTER"])
+                        M   = float(sat_elem["MEAN_ANOMALY"])
+                        coes.append([sma, ecc, inc, Om, om, M])
+                        
+                        date = pd.to_datetime(sat_elem["EPOCH"])
+
+                        if not isinstance(date, pd.Timestamp):
+                            date = pd.Timestamp(date)
+                            epoch = self.timestamp_to_mjd2000(date)
+                        else:
+                            epoch = self.timestamp_to_mjd2000(date)
+                        epochs.append(epoch)
+
+                    # Convert lists to arrays
+                    idsats = np.array(idsats)
+                    epochs = np.array(epochs)
+                    coes = np.array(coes)
+
+
+                    debris = np.column_stack((idsats, epochs, coes))
+                    debris = debris.astype(object)  # Convert to object type so mixed types are allowed
+
+                    for ind, deb in enumerate(debris):
+                        debris[ind][0] = str(int(debris[ind][0]))
                     
-                print('Custom database loaded.')
+                    self.debris = debris
+                    print('Custom database loaded.')
+
+                else:
+
+                    # Read satellite data from Excel file
+                    sats = pd.read_excel(self.filename)
+                    idsats = sats.iloc[:, 0].astype(str)  # Keep satellite IDs as strings
+
+                    coes = sats.iloc[:, 4:10].to_numpy()  # Orbital elements (columns 5 to 10)
+                    coes[:, 2:6] = self.deg2rad(coes[:, 2:6])  # Convert degrees to radians (columns 3 to 6)
+
+                    # Convert dates to Julian Date and then to MJD2000
+                    dates = pd.to_datetime(sats.iloc[:, 2])  # Column 3 contains dates
+
+                    epoch_list = []
+                    for date in dates:
+                        if not isinstance(date, pd.Timestamp):
+                            date = pd.Timestamp(date)
+                            epoch_list.append(self.timestamp_to_mjd2000(date))
+                        else:
+                            epoch_list.append(self.timestamp_to_mjd2000(date))
+                    epochs = np.array(epoch_list)
+
+                    # Create debris matrix with IDs, epochs, and orbital elements (coes)
+                    self.debris = np.column_stack((idsats, epochs, coes))
+
+                    for ind, deb in enumerate(self.debris):
+                        self.debris[ind][0] = str(ind)
+                        
+                    print('Custom database loaded.')
             else:
                 # Load default debris data from the Debris.txt file in the ephemerides folder
                 base_dir = os.path.dirname(__file__)  # Get the directory of the current script
