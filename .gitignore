@@ -1,3 +1,6 @@
 # Ignore Python cache directories
 functions/__pycache__/
 previous_tests/
+
+*.npy
+*.zip
