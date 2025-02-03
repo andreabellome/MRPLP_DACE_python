@@ -1,6 +1,7 @@
 # Ignore Python cache directories
 functions/__pycache__/
 previous_tests/
+.venv/
 
 *.npy
 *.zip
